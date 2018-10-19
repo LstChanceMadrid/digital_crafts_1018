@@ -1,5 +1,8 @@
 
 const database = firebase.database();
+let userId
+let storesRef
+
 
 
 
@@ -32,7 +35,7 @@ registerButton.addEventListener('click', function() {
 let loginEmailTextBox = document.getElementById("login-email-text-box");
 let loginPasswordTextBox = document.getElementById("login-password-text-box");
 let loginButton = document.getElementById('login-button');
-let storesRef
+
 
 loginButton.addEventListener('click', function() {
     let email = loginEmailTextBox.value;
@@ -47,16 +50,21 @@ loginButton.addEventListener('click', function() {
     })
     .then(function(user) {
         console.log('login success');
-        let userId = firebase.auth().currentUser.uid;
-        storesRef = database.ref("users/" + userId + "/stores");
-        
+        userId = firebase.auth().currentUser.uid;
+        storesRef = database.ref('users/' + userId + '/stores');
+        let stores = []
+        configureStores(storesRef)
+        return storesRef
+
     })
 })
+
+
 
 //--------------------- login end
 
 
-let stores = [];
+
 
 // ------------------ adding a store to the list
 
@@ -88,10 +96,9 @@ const displayStores = () => {
     storeList.innerHTML = ""
 
     let storeNames = stores.map(function(store) {
-        console.log(store.storeName)
         return `
             <div class="store-option-container">
-                <div class="store-name")>${store.storeName}</div>
+                <div class="store-name">${store.storeName}</div>
                 <div class="grocery-items-container">
                     <label>Grocery Items</label>
                     <input class="new-item-text-box" type="text" placeholder="item" />
@@ -103,13 +110,12 @@ const displayStores = () => {
             `;    
     });
 
-
     storeList.insertAdjacentHTML('beforeend', storeNames.join(''));
     storeList.insertAdjacentElement('afterbegin', legend);
 }
 
 
-const configureStores = () => {
+const configureStores = (storesRef) => {
     storesRef.on('value', (snapshot => {
         stores = []
         snapshot.forEach(childSnapshot => {
@@ -119,16 +125,11 @@ const configureStores = () => {
     })) 
 }
 
-configureStores()
-
-
-
+// ------------- adds item to firebase
 let items = []
-
 
 const addItem = (button) => {
     
-    let currentList = document.getElementsByClassName('grocery-items-container')
     console.log(button.parentElement.previousElementSibling.innerHTML)
     let storeName = button.parentElement.previousElementSibling.innerHTML
     let newItemTextBox = button.previousElementSibling.value
@@ -145,6 +146,7 @@ const addItem = (button) => {
 
 
 
+// formats how the items will be inserted
 
 const configureItems = (store) => {
     if (store.items == null) {
@@ -155,4 +157,7 @@ const configureItems = (store) => {
         return `<p>- ${store.items[key].itemName}</p>`
     }).join('')
 }
+
+
+
 
