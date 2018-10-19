@@ -32,25 +32,30 @@ registerButton.addEventListener('click', function() {
 let loginEmailTextBox = document.getElementById("login-email-text-box");
 let loginPasswordTextBox = document.getElementById("login-password-text-box");
 let loginButton = document.getElementById('login-button');
+let storesRef
 
 loginButton.addEventListener('click', function() {
     let email = loginEmailTextBox.value;
     let password = loginPasswordTextBox.value;
 
     firebase.auth().signInWithEmailAndPassword(email, password)
-    .then(function(user) {
-        console.log('login success');
-    })
+    
     .catch(function(error) {
         let errorCode = error.code;
         let errorMessage = error.message;
         console.log(error);
     })
+    .then(function(user) {
+        console.log('login success');
+        let userId = firebase.auth().currentUser.uid;
+        storesRef = database.ref("users/" + userId + "/stores");
+        
+    })
 })
 
 //--------------------- login end
 
-const storesRef = database.ref("stores");
+
 let stores = [];
 
 // ------------------ adding a store to the list
